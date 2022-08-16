@@ -1,0 +1,11 @@
+: 1
+name: libcrails-databases
+version: 2.0.0
+summary: agnostic database management for crails
+license: other: proprietary ; Not free/open source.
+description-file: README.md
+url: https://github.com/crails-framework/libcrails-databases
+email: michael@unetresgrossebite.com
+depends: * build2 >= 0.15.0
+depends: * bpkg >= 0.15.0
+depends: libcrails ^2.0.0
