@@ -1,5 +1,6 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
+import intf_libs += libcrails%lib{crails}
 
 lib{crails-databases}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
 
@@ -12,7 +13,7 @@ cxx.poptions =+  "-I$out_root" "-I$src_root"
 
 lib{crails-databases}:
 {
-  cxx.export.poptions = "-I$out_root" "-I$src_root"
+  cxx.export.poptions = "-I$out_root/libcrails-databases/" "-I$src_root/libcrails-databases/"
   cxx.export.libs = $intf_libs
 }
 
@@ -26,6 +27,6 @@ else
 
 {hxx ixx txx}{*}:
 {
-  install         = include/crails/
+  install         = include/
   install.subdirs = true
 }
