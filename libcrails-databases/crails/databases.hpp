@@ -91,7 +91,7 @@ namespace Crails
     TYPE& get_database(const std::string& key)
     {
       if (settings.find(Crails::environment) == settings.end())
-        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment + '\'');
+        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment_name(Crails::environment) + '\'');
       auto environment_settings = settings.at(Crails::environment);
 
       if (environment_settings.find(key) == environment_settings.end())
