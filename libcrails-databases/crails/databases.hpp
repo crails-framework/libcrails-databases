@@ -30,17 +30,17 @@ namespace Crails
       Database(const std::string& type) : type(type) {}
       virtual ~Database();
 
-      bool              operator==(const std::string& name) const { return this->name == name; }
+      bool               operator==(const std::string& name) const { return this->name == name; }
       const std::string& get_type() const { return type; }
       const std::string& get_name() const { return name; }
-      virtual void      connect(void) = 0;
+      virtual void       connect(void) = 0;
 
     protected:
-      std::string       name;
-      std::string       type;
+      std::string        name;
+      std::string        type;
     };
 
-    typedef std::vector<Database*> Dbs;
+    typedef std::vector<Database*> DatabaseList;
 
     struct Exception : public boost_ext::exception
     {
@@ -60,6 +60,8 @@ namespace Crails
     }
 
     void cleanup_databases();
+
+    void cleanup_database(Database&);
 
     Database* get_database_from_name(const std::string& key);
 
@@ -100,7 +102,7 @@ namespace Crails
     }
 
   private:
-    Dbs      databases;
+    DatabaseList databases;
   };
 
   extern thread_local Databases databases;
