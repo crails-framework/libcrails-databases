@@ -19,7 +19,8 @@ namespace Crails
   {
   public:
     typedef std::map<std::string, boost::any> DatabaseSettings;
-    typedef std::map<Environment, std::map<std::string, DatabaseSettings> > Settings;
+    typedef std::map<std::string, DatabaseSettings> DatabasesMap;
+    typedef std::map<Environment, DatabasesMap> Settings;
 
     static const Settings settings;
 
@@ -92,13 +93,15 @@ namespace Crails
     template<typename TYPE>
     TYPE& get_database(const std::string& key)
     {
-      if (settings.find(Crails::environment) == settings.end())
-        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment_name(Crails::environment) + '\'');
-      auto environment_settings = settings.at(Crails::environment);
+      Settings::const_iterator     environment_settings = settings.find(Crails::environment);
+      DatabasesMap::const_iterator database_settings;
 
-      if (environment_settings.find(key) == environment_settings.end())
+      if (environment_settings == settings.end())
+        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment_name(Crails::environment) + '\'');
+      database_settings = environment_settings->second.find(key);
+      if (database_settings == environment_settings->second.end())
         throw Databases::Exception("Database configuration not found for '" + key + "'");
-      return get_database<TYPE>(key, environment_settings[key]);
+      return get_database<TYPE>(key, database_settings->second);
     }
 
   private:
