@@ -6,6 +6,7 @@
 # include <crails/datatree.hpp>
 # include <crails/environment.hpp>
 # include <crails/utils/backtrace.hpp>
+# include <crails/utils/singleton.hpp>
 
 # define CRAILS_DATABASE(type,database) \
   Crails::databases.get_database<type::Database>(database)
@@ -20,9 +21,15 @@ namespace Crails
   public:
     typedef std::map<std::string, boost::any> DatabaseSettings;
     typedef std::map<std::string, DatabaseSettings> DatabasesMap;
-    typedef std::map<Environment, DatabasesMap> Settings;
+    typedef std::map<Environment, DatabasesMap> SettingsMap;
 
-    static const Settings settings;
+    class Settings : public SettingsMap
+    {
+      SINGLETON(Settings)
+    public:
+      Settings(const SettingsMap& data) : SettingsMap(data) {}
+      Settings() {}
+    };
 
     class Database
     {
@@ -93,16 +100,10 @@ namespace Crails
     template<typename TYPE>
     TYPE& get_database(const std::string& key)
     {
-      Settings::const_iterator     environment_settings = settings.find(Crails::environment);
-      DatabasesMap::const_iterator database_settings;
-
-      if (environment_settings == settings.end())
-        throw Databases::Exception("Database configuration not found for environment '" + Crails::environment_name(Crails::environment) + '\'');
-      database_settings = environment_settings->second.find(key);
-      if (database_settings == environment_settings->second.end())
-        throw Databases::Exception("Database configuration not found for '" + key + "'");
-      return get_database<TYPE>(key, database_settings->second);
+      return get_database<TYPE>(key, get_database_settings_for(key));
     }
+
+    const Crails::Databases::DatabaseSettings& get_database_settings_for(const std::string& key) const;
 
   private:
     DatabaseList databases;
