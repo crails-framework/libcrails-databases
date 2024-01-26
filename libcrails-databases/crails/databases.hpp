@@ -3,6 +3,7 @@
 
 # include <map>
 # include <vector>
+# include <any>
 # include <crails/datatree.hpp>
 # include <crails/environment.hpp>
 # include <crails/utils/backtrace.hpp>
@@ -19,7 +20,7 @@ namespace Crails
   class Databases
   {
   public:
-    typedef std::map<std::string, boost::any> DatabaseSettings;
+    typedef std::map<std::string, std::any> DatabaseSettings;
     typedef std::map<std::string, DatabaseSettings> DatabasesMap;
     typedef std::map<Environment, DatabasesMap> SettingsMap;
 
