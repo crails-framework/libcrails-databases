@@ -2,6 +2,7 @@ intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 import intf_libs += libcrails%lib{crails}
 import intf_libs += libcrails-design-patterns%lib{crails-design-patterns}
+import intf_libs += libcrails-database-url%lib{crails-database-url}
 
 lib{crails-databases}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
 

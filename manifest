@@ -8,4 +8,4 @@ url: https://github.com/crails-framework/libcrails-databases
 email: michael@unetresgrossebite.com
 depends: * build2 >= 0.15.0
 depends: * bpkg >= 0.15.0
-depends: libcrails ^2.0.0
+depends: { libcrails libcrails-design-patterns libcrails-database-url } ^2.0.0
