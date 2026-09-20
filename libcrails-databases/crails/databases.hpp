@@ -63,7 +63,7 @@ namespace Crails
     {
     }
 
-    ~Databases()
+    virtual ~Databases()
     {
       cleanup_databases();
     }
