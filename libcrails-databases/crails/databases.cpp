@@ -3,7 +3,7 @@
 using namespace std;
 using namespace Crails;
 
-thread_local Crails::Databases Crails::databases;
+Crails::Databases Crails::databases;
 
 Databases::Database::~Database()
 {
@@ -11,6 +11,8 @@ Databases::Database::~Database()
 
 void Databases::cleanup_databases()
 {
+  std::lock_guard<std::mutex> lock(mutex);
+
   for (auto it = databases.begin() ; it != databases.end() ; ++it)
     delete *it;
   databases.clear();
@@ -18,6 +20,7 @@ void Databases::cleanup_databases()
 
 void Databases::cleanup_database(Database& database)
 {
+  std::lock_guard<std::mutex> lock(mutex);
   auto it = std::find(databases.begin(), databases.end(), &database);
 
   if (it != databases.end())
@@ -29,7 +32,7 @@ void Databases::cleanup_database(Database& database)
     throw boost_ext::out_of_range("Database isn't currently handled by this Databases Manager");
 }
 
-Databases::Database* Databases::get_database_from_name(const std::string& key)
+Databases::Database* Databases::get_database_from_name_unlocked(const std::string& key)
 {
   for (auto it = databases.begin() ; it != databases.end() ; ++it)
   {
@@ -41,7 +44,7 @@ Databases::Database* Databases::get_database_from_name(const std::string& key)
 
 const Databases::DatabaseSettings& Databases::get_database_settings_for(const std::string& key) const
 {
-  Settings&                    settings = Settings::singleton::require();
+  const Settings&              settings = Settings::singleton::require();
   Settings::const_iterator     environment_settings = settings.find(Crails::environment);
   DatabasesMap::const_iterator database_settings;
 

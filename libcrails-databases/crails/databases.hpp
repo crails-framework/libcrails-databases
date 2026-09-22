@@ -1,18 +1,17 @@
-#ifndef  DATABASES_HPP
-# define DATABASES_HPP
+#pragma once
+#include <map>
+#include <vector>
+#include <any>
+#include <mutex>
+#include <crails/datatree.hpp>
+#include <crails/environment.hpp>
+#include <crails/utils/backtrace.hpp>
+#include <crails/utils/singleton.hpp>
 
-# include <map>
-# include <vector>
-# include <any>
-# include <crails/datatree.hpp>
-# include <crails/environment.hpp>
-# include <crails/utils/backtrace.hpp>
-# include <crails/utils/singleton.hpp>
-
-# define CRAILS_DATABASE(type,database) \
+#define CRAILS_DATABASE(type,database) \
   Crails::databases.get_database<type::Database>(database)
 
-# define CRAILS_DATABASE_FROM_SETTINGS(type,database,settings) \
+#define CRAILS_DATABASE_FROM_SETTINGS(type,database,settings) \
   Crails::databases.get_database<type::Database>(database,settings)
 
 namespace Crails
@@ -72,23 +71,18 @@ namespace Crails
 
     void cleanup_database(Database&);
 
-    Database* get_database_from_name(const std::string& key);
-
-    template<typename TYPE>
-    Database* initialize_database(const std::string& key, const Crails::Databases::DatabaseSettings& settings)
+    Database* get_database_from_name(const std::string& key)
     {
-      TYPE*     database = new TYPE(settings);
-      Database* abstract_database = reinterpret_cast<Database*>(database);
+      std::lock_guard<std::mutex> lock(mutex);
 
-      abstract_database->name = key;
-      databases.push_back(abstract_database);
-      return abstract_database;
+      return get_database_from_name_unlocked(key);
     }
 
     template<typename TYPE>
     TYPE& get_database(const std::string& key, const Crails::Databases::DatabaseSettings& settings)
     {
-      Database* db = get_database_from_name(key);
+      std::lock_guard<std::mutex> lock(mutex);
+      Database* db = get_database_from_name_unlocked(key);
 
       if (!db)
         db = initialize_database<TYPE>(key, settings);
@@ -107,10 +101,23 @@ namespace Crails
     const Crails::Databases::DatabaseSettings& get_database_settings_for(const std::string& key) const;
 
   private:
-    DatabaseList databases;
+    Database* get_database_from_name_unlocked(const std::string& key);
+
+    template<typename TYPE>
+    Database* initialize_database(const std::string& key, const Crails::Databases::DatabaseSettings& settings)
+    {
+      TYPE*     database = new TYPE(settings);
+      Database* abstract_database = reinterpret_cast<Database*>(database);
+
+      abstract_database->name = key;
+      databases.push_back(abstract_database);
+      return abstract_database;
+    }
+
+    mutable std::mutex mutex;
+    DatabaseList       databases;
   };
 
-  extern thread_local Databases databases;
+  extern Databases databases;
 }
 
-#endif
